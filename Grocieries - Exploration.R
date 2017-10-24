@@ -27,19 +27,20 @@ stores <- as_data_frame(fread("./data/stores.csv"))
 transactions <- as_data_frame(fread("./data/transactions.csv"))
 holidays <- as_data_frame(fread("./data/holidays_events.csv"))
 
+# Inner join til að gera eina töflu
 combined <- smalltrain %>%
     inner_join(items) %>%
     inner_join(stores) %>%
     inner_join(transactions) %>%
-    inner_join(oil) %>%
+    inner_join(oil)
+combined <- combined %>%  
     mutate(date = as.Date(combined$date, format = "%Y-%m-%d"))
 
 combined
 str(combined)
+summary(combined)
 
 # City boxplot
 ggplot(combined, aes(city, transactions)) + geom_boxplot() + theme_tufte() + coord_flip()
 # Transactions boxplot
 ggplot(combined, aes(family, transactions)) + geom_boxplot() + theme_tufte() + coord_flip()
-
-ggplot(combined, aes(date, transactions)) + geom_area() + theme_tufte()
