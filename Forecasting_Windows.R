@@ -22,7 +22,7 @@ library(foreach)
 # Parallel Processing
 library(parallel)
 library(doParallel)
-library(doMC)
+library(foreach)
 
 # Seed
 set.seed(1337)
@@ -35,11 +35,7 @@ set.seed(1337)
 # t.d. setwd('C:/Users/Larus/Documents/GitHub/groceries')
 
 train_names <- fread(input = "./data/train.csv", nrows = 1)
-training <- fread(input = "./data/train.csv", data.table = TRUE,
-                  skip = 100000000)
-
-# Taka allt dataset i training:
-# training <- fread(input = "./data/train.csv", data.table = TRUE)
+training <- fread(input = "./data/train.csv", data.table = TRUE)
 
 training <- as_data_frame(training)
 
@@ -71,10 +67,14 @@ fcst_matrix <- matrix(NA,nrow=nrow(train_ts),ncol=fcst_intv)
 
 
 # register cores for parallel processing in ETS forecasting
-registerDoMC(detectCores()-1)
+cluster <- makeCluster(detectCores())
+
 fcst_matrix <- foreach(i=1:nrow(train_ts),.combine=rbind, .packages=c("forecast")) %dopar% { 
   fcst_matrix <- forecast(ets(train_ts[i,]),h=fcst_intv)$mean
 }
+
+stopCluster(cluster)
+registerDoSEQ()
 
 # post-processing the forecast table
 fcst_matrix[fcst_matrix < 0] <- 0
