@@ -1,3 +1,6 @@
+# Thetta er port af forecasting.r thar sem
+# skipt er ut doMC, sem er unix only parallel processing pakki, fyrir doParallel
+
 # Wrangling
 library(dplyr)
 library(tidyr)
@@ -33,7 +36,7 @@ set.seed(1337)
 
 train_names <- fread(input = "./data/train.csv", nrows = 1)
 training <- fread(input = "./data/train.csv", data.table = TRUE,
-               skip = 100000000)
+                  skip = 100000000)
 
 # Taka allt dataset i training:
 # training <- fread(input = "./data/train.csv", data.table = TRUE)
@@ -70,7 +73,7 @@ fcst_matrix <- matrix(NA,nrow=nrow(train_ts),ncol=fcst_intv)
 # register cores for parallel processing in ETS forecasting
 registerDoMC(detectCores()-1)
 fcst_matrix <- foreach(i=1:nrow(train_ts),.combine=rbind, .packages=c("forecast")) %dopar% { 
-    fcst_matrix <- forecast(ets(train_ts[i,]),h=fcst_intv)$mean
+  fcst_matrix <- forecast(ets(train_ts[i,]),h=fcst_intv)$mean
 }
 
 # post-processing the forecast table
